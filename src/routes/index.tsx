@@ -1,269 +1,79 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import {
-  Users,
-  CheckCircle2,
-  Clock,
-  AlertTriangle,
-  Search,
-  RefreshCw,
-  Eye,
-  Pencil,
-  Send,
-} from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { toast } from "sonner";
-import { mockGuests, type Guest, type GuestStatus } from "@/lib/mock-data";
-import { StatusBadge } from "@/components/status-badge";
-import { GuestDetailModal } from "@/components/guest-detail-modal";
+import { useState } from "react";
+import { Check, X, Search, Wifi } from "lucide-react";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Painel — rezervo" },
-      {
-        name: "description",
-        content: "Painel operacional da rezervo: check-ins, filas e sincronização com portarias.",
-      },
-      { property: "og:title", content: "Painel — rezervo" },
-      {
-        property: "og:description",
-        content: "Painel operacional da rezervo: check-ins, filas e sincronização com portarias.",
-      },
-    ],
-  }),
-  component: DashboardPage,
+  component: ExtensionPopupLayout,
 });
 
-function DashboardPage() {
-  const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("todos");
-  const [selected, setSelected] = useState<Guest | null>(null);
-
-  const metrics = useMemo(() => {
-    const total = mockGuests.length;
-    const ok = mockGuests.filter((g) => g.status === "Sincronizado").length;
-    const pend = mockGuests.filter(
-      (g) => g.status === "Pendente" || g.status === "Processando",
-    ).length;
-    const err = mockGuests.filter((g) => g.status === "Falha na Foto").length;
-    return { total, ok, pend, err };
-  }, []);
-
-  const filtered = useMemo(() => {
-    return mockGuests.filter((g) => {
-      const q = query.toLowerCase().trim();
-      const matchesQ =
-        !q ||
-        g.name.toLowerCase().includes(q) ||
-        g.property.toLowerCase().includes(q);
-      const matchesS = statusFilter === "todos" || g.status === statusFilter;
-      return matchesQ && matchesS;
-    });
-  }, [query, statusFilter]);
-
-  const handleResend = (g: Guest) => {
-    // TODO: POST /api/robot/dispatch { guestId: g.id } — Antigravity webhook
-    toast.success("Reenviado para portaria", {
-      description: `${g.name} enfileirado(a) para ${g.gateSystem}.`,
-    });
-  };
+function ExtensionPopupLayout() {
+  const [guests, setGuests] = useState([
+    {
+      id: "1",
+      nome_completo: "Diego Vargas",
+      cpf: "123.456.789-00",
+      telefone: "(11) 98765-4321",
+      checkin_date: "2026-07-26T14:00:00",
+      checkout_date: "2026-07-30T10:00:00",
+      selfie_url: "https://i.pravatar.cc/150?u=diego"
+    },
+    {
+      id: "2",
+      nome_completo: "Maria Silva",
+      cpf: "987.654.321-11",
+      telefone: "(21) 99999-8888",
+      checkin_date: "2026-07-27T12:00:00",
+      checkout_date: "2026-08-05T12:00:00",
+      selfie_url: "https://i.pravatar.cc/150?u=maria"
+    }
+  ]);
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Metric cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          label="Check-ins hoje"
-          value={metrics.total}
-          icon={Users}
-          tint="bg-primary/10 text-primary"
-        />
-        <MetricCard
-          label="Sincronizados"
-          value={metrics.ok}
-          icon={CheckCircle2}
-          tint="bg-success/10 text-success"
-        />
-        <MetricCard
-          label="Pendentes / Em fila"
-          value={metrics.pend}
-          icon={Clock}
-          tint="bg-warning/20 text-warning-foreground"
-        />
-        <MetricCard
-          label="Erros / Atenção"
-          value={metrics.err}
-          icon={AlertTriangle}
-          tint="bg-destructive/10 text-destructive"
-        />
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-4 flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por hóspede ou imóvel..."
-              className="pl-9"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
+    <div className="min-h-screen bg-slate-900 text-slate-50 flex items-center justify-center p-4" style={{ backgroundImage: 'radial-gradient(circle at top right, rgba(0, 163, 255, 0.1), transparent 300px)' }}>
+      {/* Extension Container (Simula o tamanho do Popup do Chrome) */}
+      <div className="w-[350px] min-h-[450px] max-h-[550px] bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl flex flex-col shadow-2xl relative overflow-hidden">
+        
+        {/* HEADER */}
+        <div className="flex justify-between items-center p-4 border-b border-white/10 bg-slate-900/50">
+          <div className="flex items-center gap-2">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 10L12 3L21 10V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V10Z" stroke="#00A3FF" strokeWidth="2" strokeLinejoin="round"/>
+              <path d="M8 10H16V16H8V10Z" stroke="#fff" strokeWidth="1.5"/>
+              <path d="M10 8V12M14 8V12" stroke="#fff" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M21 16L16 21" stroke="#00A3FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="font-bold text-lg tracking-tight">reser<span className="text-[#00A3FF]">z</span>o</span>
           </div>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="sm:w-56">
-              <SelectValue placeholder="Filtrar por status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos os status</SelectItem>
-              <SelectItem value="Sincronizado">Sincronizado</SelectItem>
-              <SelectItem value="Pendente">Pendente</SelectItem>
-              <SelectItem value="Processando">Processando</SelectItem>
-              <SelectItem value="Falha na Foto">Falha na Foto</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+            <span className="text-xs font-medium text-slate-400">Pronto</span>
+          </div>
+        </div>
 
-      {/* Table */}
-      <Card>
-        <CardContent className="p-0 overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/40">
-                <TableHead className="w-16">Foto</TableHead>
-                <TableHead>Hóspede</TableHead>
-                <TableHead>Contato</TableHead>
-                <TableHead>Imóvel / Condomínio</TableHead>
-                <TableHead>Portaria</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Check-in</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((g) => (
-                <TableRow
-                  key={g.id}
-                  className="cursor-pointer hover:bg-muted/40"
-                  onClick={() => setSelected(g)}
-                >
-                  <TableCell>
-                    <img
-                      src={g.photo}
-                      alt={g.name}
-                      className="h-10 w-10 rounded-full object-cover border"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{g.name}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    <div>{g.cpf}</div>
-                    <div>{g.phone}</div>
-                  </TableCell>
-                  <TableCell className="text-sm">{g.property}</TableCell>
-                  <TableCell className="text-sm">{g.gateSystem}</TableCell>
-                  <TableCell>
-                    <StatusBadge status={g.status as GuestStatus} />
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {formatDate(g.checkinAt)}
-                  </TableCell>
-                  <TableCell
-                    className="text-right space-x-1"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleResend(g)}
-                      title="Reenviar para portaria"
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelected(g)}
-                      title="Ver ficha completa"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" title="Editar">
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {filtered.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center text-sm text-muted-foreground py-10">
-                    Nenhum hóspede encontrado com os filtros atuais.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      <GuestDetailModal
-        guest={selected}
-        open={!!selected}
-        onOpenChange={(o) => !o && setSelected(null)}
-      />
+        {/* CONTENT */}
+        <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-3 custom-scrollbar">
+          {guests.map((guest) => (
+            <div key={guest.id} className="bg-slate-800/70 border border-white/10 rounded-xl p-4 backdrop-blur-md transition-all hover:-translate-y-0.5 hover:shadow-lg hover:border-[#00A3FF]/30">
+              <div className="flex items-center gap-3 mb-3">
+                <img src={guest.selfie_url} alt="Selfie" className="w-12 h-12 rounded-full object-cover border-2 border-slate-800" />
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-50">{guest.nome_completo}</h3>
+                  <p className="text-xs text-slate-400">CPF: {guest.cpf}</p>
+                  <p className="text-xs text-slate-400">Tel: {guest.telefone}</p>
+                </div>
+              </div>
+              <div className="bg-black/20 rounded-md p-2 mb-3 flex flex-col gap-1 text-[11px] text-slate-400">
+                <div>Início: <span className="text-slate-50 font-medium">{new Date(guest.checkin_date).toLocaleString('pt-BR')}</span></div>
+                <div>Fim: <span className="text-slate-50 font-medium">{new Date(guest.checkout_date).toLocaleString('pt-BR')}</span></div>
+              </div>
+              <button className="w-full py-2.5 bg-[#00A3FF] hover:bg-[#008be5] text-white text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                Preencher Condfy
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
-
-function MetricCard({
-  label,
-  value,
-  icon: Icon,
-  tint,
-}: {
-  label: string;
-  value: number;
-  icon: typeof Users;
-  tint: string;
-}) {
-  return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-            <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
-          </div>
-          <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${tint}`}>
-            <Icon className="h-5 w-5" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-// Suppress unused import warning when Send unused in future
-void Send;

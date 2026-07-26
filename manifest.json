@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "EasyLink — Condfy (by rezervo)",
+  "version": "1.0.0",
+  "description": "Orquestrador de dados e Auto-fill para o portal Condfy.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.condfy.com.br/*",
+    "https://api.ncollect.com.br/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "EasyLink — Condfy"
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+}
